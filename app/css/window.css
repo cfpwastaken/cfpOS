@@ -1,0 +1,65 @@
+html {
+  overflow: hidden;
+}
+
+.window-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
+  user-select: none;
+  width: 500px;
+  height: 350px;
+  position: absolute;
+}
+
+.window {
+  display: block;
+  padding: 0;
+  position: absolute;
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+}
+
+.icon-loading {
+  width: 130px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 15px);
+  margin-left: 10px;
+  margin-right: 5px;
+  gap: 5px;
+  user-select: none;
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.controls a {
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  transition: background-color 100ms;
+}
+
+.control-close:hover {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+.control:hover {
+  background-color: rgba(0, 0, 255, 0.5);
+}
+
+#taskbar {
+  user-select: none;
+}
