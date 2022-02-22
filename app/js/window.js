@@ -1,4 +1,5 @@
 const windows = [];
+const TABLETMODE = false;
 
 function dragElement(el) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -45,15 +46,18 @@ function dragElement(el) {
 
 function addWindow(el) {
   windows.push(el);
-  dragElement(el);
+  if(!TABLETMODE) dragElement(el);
   if(el.getElementsByClassName("bar")[0]) {
-    el.getElementsByClassName("bar")[0].getElementsByClassName("controls")[0].getElementsByClassName("maximize")[0].addEventListener("click", () => {
-      maximizeWindow(el);
-    })
+    if(!TABLETMODE) {
+      el.getElementsByClassName("bar")[0].getElementsByClassName("controls")[0].getElementsByClassName("maximize")[0].addEventListener("click", () => {
+        maximizeWindow(el);
+      })
+    }
     el.getElementsByClassName("bar")[0].getElementsByClassName("controls")[0].getElementsByClassName("close")[0].addEventListener("click", () => {
       deleteWindow(el);
     })
   }
+  if(TABLETMODE) maximizeWindow(el);
 }
 
 function undrag(el) {
@@ -64,8 +68,10 @@ function undrag(el) {
   }
 }
 
-function deleteWindow(el) {
+async function deleteWindow(el) {
   removeWindow(el);
+  el.classList.add("window-close");
+  await sleep(310);
   el.remove();
 }
 
@@ -98,7 +104,6 @@ function createWindowFromDiv(window, imgsrc, nametext) {
   window.classList.add("fluent-blur");
   window.style.width = "580px";
   window.style.height = "350px";
-  document.body.appendChild(window);
 
   const bar = document.createElement("div");
   bar.classList.add("bar");
@@ -117,17 +122,19 @@ function createWindowFromDiv(window, imgsrc, nametext) {
   controls.classList.add("controls");
   bar.appendChild(controls);
 
-  const minimize = document.createElement("a");
-  minimize.classList.add("control");
-  minimize.classList.add("minimize");
-  minimize.innerText = "_";
-  controls.appendChild(minimize);
+  if(!TABLETMODE) {
+    const minimize = document.createElement("a");
+    minimize.classList.add("control");
+    minimize.classList.add("minimize");
+    minimize.innerText = "_";
+    controls.appendChild(minimize);
 
-  const maximize = document.createElement("a");
-  maximize.classList.add("control");
-  maximize.classList.add("maximize");
-  maximize.innerText = "O";
-  controls.appendChild(maximize);
+    const maximize = document.createElement("a");
+    maximize.classList.add("control");
+    maximize.classList.add("maximize");
+    maximize.innerText = "O";
+    controls.appendChild(maximize);
+  }
 
   const close = document.createElement("a");
   close.classList.add("control-close");
@@ -142,6 +149,7 @@ function createWindow(imgsrc, nametext) {
   const window = document.createElement("div");
   window.style.top = "0px";
   window.style.left = "0px";
+  document.body.insertBefore(document.getElementById("taskbar"), window);
   
   return createWindowFromDiv(window, imgsrc, nametext);
 }
@@ -153,7 +161,7 @@ function createLoadingWindow(imgsrc, statustext) {
   window.classList.add("fluent-blur-dark");
   window.style.top = "0px";
   window.style.left = "0px";
-  document.body.appendChild(window);
+  document.body.insertBefore(window, document.getElementById("taskbar"));
 
   const img = document.createElement("img");
   img.src = imgsrc;
@@ -184,10 +192,6 @@ function sleep(ms) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("fd").addEventListener("click", () => {
-    addWindow(createWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
-      "Settings"));
-  });
   document.getElementById("fdd").addEventListener("click", async () => {
     const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
       "Settings");

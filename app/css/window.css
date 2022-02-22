@@ -12,6 +12,30 @@ html {
   width: 500px;
   height: 350px;
   position: absolute;
+  animation: zoomin 300ms;
+}
+
+.window-close {
+  animation: zoomout 300ms;
+  animation-fill-mode: forwards;
+}
+
+@keyframes zoomout {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes zoomin {
+  from {
+    transform: scale(0.5);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 .window {
@@ -62,4 +86,5 @@ html {
 
 #taskbar {
   user-select: none;
+  z-index: 999;
 }
