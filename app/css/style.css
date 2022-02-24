@@ -2,17 +2,4 @@
 
 html {
   font-family: "Roboto";
-//  background: url(https://cfp.gotdns.ch/clipart/bg/bg1.png);
-  background-color: black;
-  background-image: url(../img/wp.jpg);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-direction: column;
-  margin: 0;
-  height: 100vh;
-  gap: 5px;
 }

@@ -1,5 +1,12 @@
 html {
   overflow: hidden;
+  //  background: url(https://cfp.gotdns.ch/clipart/bg/bg1.png);
+  background-color: black;
+  background-image: url(../img/wp.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100vh;
 }
 
 .window-loading {
@@ -64,9 +71,10 @@ html {
 }
 
 .controls {
-  display: flex;
+  /* display: flex;
   justify-content: flex-end;
-  width: 100%;
+  float: right; */
+  margin-left: auto;
 }
 
 .controls a {
@@ -87,4 +95,35 @@ html {
 #taskbar {
   user-select: none;
   z-index: 999;
+  display: flex;
+  gap: 5px;
+}
+
+.start-text {
+  color: white;
+  font-size: 30px;
+}
+
+#start {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 20px;
+}
+
+#html_taskbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: column;
+  margin: 0;
+  gap: 5px;
+  height: 100vh;
+}
+
+.start-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

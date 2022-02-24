@@ -1,0 +1,26 @@
+AMONG US
+<input type="checkbox" id="tablet">
+<label for="tablet">Tablet Mode</label>
+<span id="msg"></span>
+<style>
+  * {
+    color: white;
+  }
+</style>
+
+<script>
+  const { ipcRenderer } = require('electron')
+  // ipcRenderer.on('ping', () => {
+    // ipcRenderer.sendToHost('pong')
+  // })
+  // document.getElementById("tablet").checked = ipcRenderer.send("config-get", "tablet");
+  const fs = require("fs");
+  const config = require("../../config.json");
+  document.getElementById("tablet").checked = config.tablet;
+  document.getElementById("tablet").addEventListener("change", () => {
+    config.tablet = document.getElementById("tablet").checked;
+    fs.writeFileSync("./config.json", JSON.stringify(config));
+    ipcRenderer.send("reload");
+  });
+</script>
+<link rel="stylesheet" href="../../app/css/style.css">

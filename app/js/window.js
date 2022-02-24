@@ -1,5 +1,15 @@
+const { ipcRenderer } = require("electron");
+
 const windows = [];
-const TABLETMODE = false;
+let focusedWindow = null;
+const fs = require("fs");
+if(!fs.existsSync("config.json")) {
+  fs.writeFileSync("config.json", JSON.stringify({
+    tablet: false
+  }));
+}
+const config = require("../config.json");
+const TABLETMODE = config.tablet;
 
 function dragElement(el) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -10,6 +20,7 @@ function dragElement(el) {
   }
 
   function dragMouseDown(e) {
+    focusedWindow = el;
     e = e || window.event;
     e.preventDefault();
     // get the mouse cursor position at startup:
@@ -44,6 +55,56 @@ function dragElement(el) {
   }
 }
 
+function startApp(name) {
+  if(TABLETMODE) unshowStart();
+  const app = require("../apps/" + name + "/init.js");
+  const win = createLoadingWindow(app.icon, app.name);
+  addWindow(win);
+  app.start((status) => {
+    console.log("STATUS");
+    win.getElementsByTagName("h2")[0].innerText = status;
+  },() => {
+    console.log("FINISH");
+    undrag(win);
+    removeWindow(win);
+    windowLoadFinish(win, app.name);
+    addWindow(win);
+    const iframe = document.createElement("webview");
+    iframe.addEventListener('console-message', (e) => {
+      console.log("[" + app.name + "]", e.message)
+    })
+    iframe.nodeintegration = true;
+    iframe.webpreferences =  "contextIsolation=false, webSecurity=false";
+    iframe.src = "../apps/" + name + "/index.html";
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+    win.appendChild(iframe);
+  },() => {
+    console.log("ERROR");
+  });
+  // const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
+  //   "Settings");
+  // addWindow(el);
+  // await sleep(2000);
+  // undrag(el);
+  // removeWindow(el);
+  // windowLoadFinish(el, "Settings");
+  // addWindow(el);
+}
+
+function getApps() {
+  const dirs = fs.readdirSync("apps");
+  const apps = [];
+  for (let i = 0; i < dirs.length; i++) {
+    if (fs.existsSync("apps/" + dirs[i] + "/init.js")) {
+      const app = require("../apps/" + dirs[i] + "/init.js");
+      apps.push({dir: dirs[i], name: app.name, icon: app.icon});
+    }
+  }
+  return apps;
+}
+
 function addWindow(el) {
   windows.push(el);
   if(!TABLETMODE) dragElement(el);
@@ -71,6 +132,7 @@ function undrag(el) {
 async function deleteWindow(el) {
   removeWindow(el);
   el.classList.add("window-close");
+  if(TABLETMODE) showStart();
   await sleep(310);
   el.remove();
 }
@@ -186,20 +248,94 @@ function windowLoadFinish(window, nametext) {
   return createWindowFromDiv(window, imgsrc, nametext);
 }
 
-// promise sleep function
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function showStart() {
+  const start = document.createElement("div");
+  start.id = "start";
+  document.body.appendChild(start);
+
+  const apps = getApps();
+  for (let i = 0; i < apps.length; i++) {
+    const app = document.createElement("div");
+    app.classList.add("start-app");
+    document.getElementById("start").appendChild(app);
+
+    const img = document.createElement("img");
+    img.src = apps[i].icon;
+    img.style.width = "150px";
+    img.addEventListener("click", async () => {
+      startApp(apps[i].dir);
+    });
+    app.appendChild(img);
+
+    const name = document.createElement("span");
+    console.log(apps[i]);
+    name.innerText = apps[i].name;
+    name.classList.add("start-text");
+    app.appendChild(name);
+  }
+}
+
+function unshowStart() {
+  document.getElementById("start").remove();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("fdd").addEventListener("click", async () => {
-    const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
-      "Settings");
-    addWindow(el);
-    await sleep(2000);
-    undrag(el);
-    removeWindow(el);
-    windowLoadFinish(el, "Settings");
-    addWindow(el);
-  });
+  if(!TABLETMODE) {
+    document.body.id = "html_taskbar";
+    const taskbar = document.createElement("div");
+    taskbar.id = "taskbar";
+    document.body.appendChild(taskbar);
+
+    const apps = getApps();
+    for (let i = 0; i < apps.length; i++) {
+      const app = document.createElement("div");
+      app.classList.add("taskbar-app");
+      taskbar.appendChild(app);
+
+      const img = document.createElement("img");
+      img.src = apps[i].icon;
+      img.style.width = "50px";
+      img.addEventListener("click", async () => {
+        startApp(apps[i].dir);
+      });
+      app.appendChild(img);
+    }
+
+    // const img = document.createElement("img");
+    // img.src = "https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png";
+    // img.style.width = "50px";
+    // img.addEventListener("click", async () => {
+    //   const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
+    //     "Settings");
+    //   addWindow(el);
+    //   await sleep(2000);
+    //   undrag(el);
+    //   removeWindow(el);
+    //   windowLoadFinish(el, "Settings");
+    //   addWindow(el);
+    // });
+    // taskbar.appendChild(img);
+  } else {
+    document.body.id = "html_start";
+    showStart();
+  }
+
+  if(fs.existsSync(".dev")) {
+    const dev = fs.readFileSync(".dev", "utf8");
+    startApp(dev);
+  }
+});
+
+window.addEventListener("beforeunload", (e) => {
+  console.log(e);
+  e.returnValue = false;
+  if(focusedWindow) {
+    deleteWindow(focusedWindow);
+  } else {
+    console.log("No focused window");
+  }
 });
