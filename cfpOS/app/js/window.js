@@ -82,6 +82,8 @@ function startApp(name) {
     win.appendChild(iframe);
   },() => {
     console.log("ERROR");
+    deleteWindow(win);
+    startApp("../error")
   });
   // const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
   //   "Settings");
