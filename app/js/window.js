@@ -65,6 +65,8 @@ function startApp(name) {
     win.getElementsByTagName("h2")[0].innerText = status;
   },() => {
     console.log("FINISH");
+    document.onmouseup = null;
+    document.onmousemove = null;
     undrag(win);
     removeWindow(win);
     windowLoadFinish(win, app.name);
@@ -83,7 +85,7 @@ function startApp(name) {
   },() => {
     console.log("ERROR");
     deleteWindow(win);
-    startApp("../error")
+    // startApp("../error")
   });
   // const el = createLoadingWindow("https://winaero.com/blog/wp-content/uploads/2020/09/Windows-10-Settings-gear-icon-colorful-256-big.png",
   //   "Settings");
